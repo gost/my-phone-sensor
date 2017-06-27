@@ -9,6 +9,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/gost-elements/gost-thing.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/gost-elements/gost-creator.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view2">
@@ -21,17 +27,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+    <gost-creator id='creator'></gost-creator>
+
+
+
     <div class="card">
       <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+      <h1>Create your thing</h1>
+      <paper-input label="username">
+        <iron-icon icon="mail" prefix></iron-icon>
+        <div suffix>@email.com</div>
+      </paper-input>
+      <paper-button on-click="submit">Submit</paper-button>
+      
     </div>
   </template>
 
   <script>
     class MyView2 extends Polymer.Element {
       static get is() { return 'my-view2'; }
+      static get properties() { 
+        return {
+        }
+      }
+      submit(){
+        var mything = {
+            "description": "My phone",
+            "name":"Phone",
+            "properties": {
+                "organisation": "Geodan",
+                "owner": "Me"
+            }
+        }
+        this.$.creator.createThing(mything);
+      }
     }
 
     window.customElements.define(MyView2.is, MyView2);
