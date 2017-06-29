@@ -12,9 +12,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/gost-elements/gost-thing.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-error.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-container.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/gost-elements/gost-creator.html">
+
+<link rel="import" href="geo-location.html">
+<link rel="import" href="mock-device-orientation.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view2">
@@ -28,18 +36,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <gost-creator id='creator'></gost-creator>
-
+    <geo-location id="geolocator" idle=[[!locationtoggle]]></geo-location>
+    <device-orientation id="orientator" 
+      api-supported={{orientationsupported}}
+      sensors-available={{sensorsavailable}}
+      orientation={{myorientation}}
+      active=false
+    ></device-orientation>
 
 
     <div class="card">
       <div class="circle">2</div>
       <h1>Create your thing</h1>
-      <paper-input label="username">
-        <iron-icon icon="mail" prefix></iron-icon>
-        <div suffix>@email.com</div>
-      </paper-input>
-      <paper-button on-click="submit">Submit</paper-button>
+      OrientationApi: [[orientationsupported]] <br>
+      Sensoravailable: [[sensorsavailable]]<br>
+      MyOrientation: [[myorientation.absolute]]<br>
       
+      <form is="iron-form" id="form" method="post" action="#">
+        <paper-input label="Your name" required auto-validate error-message="required"></paper-input>
+        <paper-input label="Device name" required auto-validate error-message="required"></paper-input>
+        <paper-dropdown-menu label="Device type">
+          <paper-listbox slot="dropdown-content" selected="1">
+            <paper-item>Android phone</paper-item>
+            <paper-item>iPhone</paper-item>
+            <paper-item>Windows phone</paper-item>
+            <paper-item>other</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-toggle-button id="locationtoggle" toggles checked={{locationtoggle}}>Enable location</paper-toggle-button>
+        <paper-button raised on-click="submit">Submit</paper-button>
+      </form>
     </div>
   </template>
 
@@ -48,17 +74,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'my-view2'; }
       static get properties() { 
         return {
+          locationtoggle: {
+            type:Boolean,
+            value: false
+          }
         }
+      }
+      ready(){
+        super.ready();
+        var form = this.$.form;
+        form.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          //TODO: add form checking
+        });
+        /*TODO
+        var loc = document.querySelector('geo-location');
+        loc.addEventListener('geo-response', function(e) {
+          console.log('lat:' + this.latitude, 'lng:' + this.longitude);
+        });
+        */
+
       }
       submit(){
         var mything = {
             "description": "My phone",
             "name":"Phone",
             "properties": {
-                "organisation": "Geodan",
-                "owner": "Me"
+                "organisation": null,
+                "owner": null
             }
         }
+        var mylocation = {
+            "description": "my backyard",
+            "name": "my backyard",
+            "encodingType": "application/vnd.geo+json",
+            "location": {
+                "type": "Point",
+                "coordinates": [-117.123,
+                54.123]
+            }
+        };
+
+
         this.$.creator.createThing(mything);
       }
     }

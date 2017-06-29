@@ -24,14 +24,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="card">
       <div class="circle">3</div>
       <h1>View Three</h1>
-      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
+      <ol>
+        <li>Adding thing (using preset observed property and sensor)
+          <li>Creating datastream
+      </ol>
     </div>
   </template>
 
   <script>
     class MyView3 extends Polymer.Element {
       static get is() { return 'my-view3'; }
+    }
+
+    createstream(){
+        var mydatstream = {
+            "unitOfMeasurement": {
+                "symbol": "degrees",
+                "name": "degree rotation",
+                "definition": "null"
+            },
+          "observationType":"null",
+          "description": "Phone rotation  readings",
+          "name": "Phone rotation  readings",
+          "Thing": {"@iot.id": null},
+          "ObservedProperty": {"@iot.id": 9},
+          "Sensor": {"@iot.id": 6}
+        };
     }
 
     window.customElements.define(MyView3.is, MyView3);

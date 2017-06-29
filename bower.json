@@ -18,7 +18,10 @@
     "paper-input": "PolymerElements/paper-input#v2.0.0",
     "polymer": "Polymer/polymer#^2.0.1",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.11",
-    "paper-button": "PolymerElements/paper-button#v2.0.0"
+    "paper-button": "PolymerElements/paper-button#v2.0.0",
+    "paper-listbox": "PolymerElements/paper-listbox#v2.0.0",
+    "paper-item": "PolymerElements/paper-item#v2.0.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#v2.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0-rc.3"

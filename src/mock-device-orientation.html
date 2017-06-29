@@ -1,0 +1,95 @@
+<!--
+@license
+Copyright (c) 2016 Abdón Rodríguez Davila (@abdonrd). All rights reserved.
+This code may only be used under the MIT style license found at https://abdonrd.github.io/LICENSE.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!--
+Polymer element to detecting device orientation.
+
+Example to get the device orientation values:
+
+```html
+<device-orientation orientation="{{orientation}}"></device-orientation>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="device-orientation">
+  <script>
+    class DeviceOrientation extends Polymer.Element {
+      static get is() {return 'device-orientation'}
+
+      static get properties() {return {
+        /**
+         * The device orientation data.
+         *
+         * An object with the `absolute`, `alpha`, `beta` and `gamma` values.
+         */
+        orientation: {
+          type: Object,
+          readOnly: false,
+          notify: true
+        },
+
+        /**
+         * Indicates whether Device Orientation API is supported or not.
+         */
+        apiSupported: {
+          type: Boolean,
+          readOnly: true,
+          notify: true
+        },
+
+        /**
+         * Indicates whether relevant sensors are available or not.
+         */
+        sensorsAvailable: {
+          type: Boolean,
+          readOnly: true,
+          notify: true
+        },
+        /**
+         * If true, the element will be active
+         */
+        active: {
+          type: Boolean,
+          value: false,
+          observer: '_toggle'
+        }
+      }
+      }
+
+      ready () {
+        super.ready();
+        //this.set('ApiSupported',true);
+      }
+      _toggle(){
+
+        console.log('thou shall skip this');
+        debugger;
+        if (this.active===true){
+          this.start();
+        }
+        else {
+          this.stop();
+        }
+      }
+      start(){
+        var self = this;
+        function rotate(){
+            self.set('orientation', {absolute: Math.random(), alpha: 0, beta: 0, gamma: 0});
+        }
+        rotate();
+        this.orientinterval = window.setInterval(rotate,2000);
+      }
+      stop(){
+        window.clearInterval(this.orientinterval);
+      }
+    };
+    window.customElements.define(DeviceOrientation.is, DeviceOrientation);
+  </script>
+</dom-module>
