@@ -1,17 +1,15 @@
 <!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/gost-elements/gost-rest.html">
-<link rel="import" href="../bower_components/gost-elements/gost-table.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/gost-elements/gost-things.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="shared-styles.html">
+
 
 <dom-module id="my-view1">
   <template>
@@ -22,19 +20,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 10px;
       }
     </style>
+    <!-- Non UI elements -->
+    <gost-things auto id='thingsrequest'
+        requesturl='http://gost.geodan.nl/v1.0/Things'
+        filter= [[filter]]
+        things='{{thingsarray}}'
+      >
+    </gost-things>
+    
+
+    <!-- UI elements -->
 
     <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <gost-rest auto id='thingsrequest'
-        requesturl='http://gost.geodan.nl/v1.0/Things'
-        resultarray='{{thingsarray}}'
-    >
-      </gost-rest>
-      <gost-table id='thingstable'
-            resultarray='[[thingsarray]]'
-            columns='[[columns]]'>
-        </gost-table>
+      <div class="card-content">
+        <h2>Status</h2>
+        <dom-if if=[[checking_phone]]>
+          <template>
+            <div>
+              <paper-spinner active=[[checking_phone]]></paper-spinner>
+              Checking if your phone is registered...
+            </div>
+          </template>
+        </dom-if>
+        <dom-if if=[[addphone]]>
+          <template>
+          Your phone is not registered. In order to register, turn your location and motion sensors on.
+          </template>
+        </dom-if>
+        <dom-if if=[[!addphone]]>
+          <template>
+          Your phone is registered.
+          </template>
+      </dom-if>
+        <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>Enable location</paper-toggle-button>
+        <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>Enable sensors</paper-toggle-button>
+        <dom-if if="{{testReadyToRegister(addphone,locationtoggle,sensortoggle) }}" >
+          <template>
+            <div class="card-actions">
+              <paper-button on-click='doregister'>continue</paper-button>
+            </div>
+          </template>
+        </dom-if>
+        <dom-if if=[[!addphone]]>
+          <template>
+            <paper-button on-click='delete'>De-register my phone</paper-button>
+          </template>
+        </dom-if>
+      </div>
     </div>
   </template>
 
@@ -43,18 +75,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'my-view1'; }
       static get properties() {
           return {
-              columns: {
-                  type: Array,
-                  value: function() {
-                      return [
-                          {title: 'ID',key: '@iot.id',type: Number},
-                          {title: 'Description',key: 'description',type: String},
-                          {title: 'Properties',key: 'properties',type: Object}
-                      ];
-                  }
-              }
-             
+            thingsarray: {
+              type: Array,
+              observer: '_thingsArrayChanged'
+            },
+            uid: {
+              type:String,
+              observer: '_createFilter'
+            },
+            myphone: {
+              type: Object,
+              notify: true
+            },
+            statustext: {
+              type: String,
+              value: "Looking for phone..."
+            },
+            filter: {
+              type: String
+            },
+            addphone: {
+              type: Boolean,
+              value: false
+            },
+            locationtoggle: {
+              type: Boolean,
+              notify: true
+            },
+            sensortoggle: {
+              type: Boolean,
+              notify: true
+            }
           };
+      }
+      ready(){
+        super.ready();
+        this.$.thingsrequest.addEventListener('deleted',()=>{
+          this.$.thingsrequest.refresh();
+        })
+      }
+      testReadyToRegister(addphone,locationtoggle,sensortoggle){
+        if (addphone && locationtoggle && sensortoggle){
+          return true;
+        }
+        return false;
+      }
+      doregister(){
+        this.dispatchEvent(new CustomEvent('doregister'));
+      }
+      delete(){
+        if (this.myphone){
+          this.$.thingsrequest.delete(this.myphone["@iot.id"]);
+        }
+        else {
+          console.warn('No active phone to delete');
+        }
+      }
+      _createFilter(uid){
+        this.filter = "name eq '" + uid+"'";
+      }
+      _thingsArrayChanged(thingsarray){
+        if (thingsarray.length > 0){
+          this.myphone = thingsarray[0];
+        }
+        else {
+          this.addphone = true;
+        }
+        this.checking_phone = false;
       }
     }
 

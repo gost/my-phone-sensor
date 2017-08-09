@@ -21,7 +21,12 @@
     "paper-button": "PolymerElements/paper-button#v2.0.0",
     "paper-listbox": "PolymerElements/paper-listbox#v2.0.0",
     "paper-item": "PolymerElements/paper-item#v2.0.0",
-    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#v2.0.0"
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#v2.0.0",
+    "fingerprintjs2": "^1.5.1",
+    "paper-spinner": "^2.0.0",
+    "neon-animation": "^2.0.1",
+    "paper-dialog": "^2.0.0",
+    "iron-form": "^2.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0-rc.3"

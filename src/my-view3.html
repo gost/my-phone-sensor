@@ -34,24 +34,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     class MyView3 extends Polymer.Element {
       static get is() { return 'my-view3'; }
-    }
 
-    createstream(){
-        var mydatstream = {
-            "unitOfMeasurement": {
-                "symbol": "degrees",
-                "name": "degree rotation",
-                "definition": "null"
-            },
-          "observationType":"null",
-          "description": "Phone rotation  readings",
-          "name": "Phone rotation  readings",
-          "Thing": {"@iot.id": null},
-          "ObservedProperty": {"@iot.id": 9},
-          "Sensor": {"@iot.id": 6}
-        };
+      createstream(){
+          var mydatstream = {
+              "unitOfMeasurement": {
+                  "symbol": "degrees",
+                  "name": "degree rotation",
+                  "definition": "null"
+              },
+            "observationType":"null",
+            "description": "Phone rotation  readings",
+            "name": "Phone rotation  readings",
+            "Thing": {"@iot.id": null},
+            "ObservedProperty": {"@iot.id": 9},
+            "Sensor": {"@iot.id": 6}
+          };
+      }
     }
-
     window.customElements.define(MyView3.is, MyView3);
   </script>
 </dom-module>

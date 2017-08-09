@@ -55,7 +55,7 @@ Example to get the device orientation values:
         /**
          * If true, the element will be active
          */
-        active: {
+        auto: {
           type: Boolean,
           value: false,
           observer: '_toggle'
@@ -68,10 +68,7 @@ Example to get the device orientation values:
         //this.set('ApiSupported',true);
       }
       _toggle(){
-
-        console.log('thou shall skip this');
-        debugger;
-        if (this.active===true){
+        if (this.auto===true){
           this.start();
         }
         else {
@@ -82,6 +79,7 @@ Example to get the device orientation values:
         var self = this;
         function rotate(){
             self.set('orientation', {absolute: Math.random(), alpha: 0, beta: 0, gamma: 0});
+            console.log('orientation!');
         }
         rotate();
         this.orientinterval = window.setInterval(rotate,2000);

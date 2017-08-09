@@ -196,12 +196,11 @@ class GeoLocaton extends Polymer.Element {
         this._setPosition(pos);
         this._setLatitude(pos.coords.latitude);
         this._setLongitude(pos.coords.longitude);
-
-        this.fire('geo-response', {
+        this.dispatchEvent(new CustomEvent('geo-response', {
           latitude: this.latitude,
           longitude: this.longitude,
           position: pos
-        });
+        }));
     }
 
       /**
@@ -210,10 +209,10 @@ class GeoLocaton extends Polymer.Element {
        * @param {Position} err The error that was returned.
        */
     _onError(err) {
-        this.fire('geo-error', {
+      this.dispatchEvent(new CustomEvent('geo-error', {
           error: err.code + ': ' + err.message,
           code: err.code
-        });
+        }));
     }
     };
   window.customElements.define(GeoLocaton.is, GeoLocaton);

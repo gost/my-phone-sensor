@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/gost-elements/gost-thing.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-input-error.html">
 <link rel="import" href="../bower_components/paper-input/paper-input-container.html">
@@ -18,7 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+
 <link rel="import" href="../bower_components/gost-elements/gost-creator.html">
 
 <link rel="import" href="geo-location.html">
@@ -36,36 +37,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <gost-creator id='creator'></gost-creator>
-    <geo-location id="geolocator" idle=[[!locationtoggle]]></geo-location>
-    <device-orientation id="orientator" 
-      api-supported={{orientationsupported}}
-      sensors-available={{sensorsavailable}}
-      orientation={{myorientation}}
-      active=false
-    ></device-orientation>
+    
 
 
     <div class="card">
       <div class="circle">2</div>
-      <h1>Create your thing</h1>
+      <h1>Add your phone</h1>
+      <!-- Debug -->
+      My UID: [[uid]]
       OrientationApi: [[orientationsupported]] <br>
       Sensoravailable: [[sensorsavailable]]<br>
       MyOrientation: [[myorientation.absolute]]<br>
-      
-      <form is="iron-form" id="form" method="post" action="#">
-        <paper-input label="Your name" required auto-validate error-message="required"></paper-input>
-        <paper-input label="Device name" required auto-validate error-message="required"></paper-input>
+      MyLocation: [[mylocation.x]],[[mylocation.y]]<br>
+      <!-- End of debug -->
+      <iron-form id="registerForm">
+      <form  method="post" action="#">
+        <paper-input  id="namefield" label="Your name" value="{{yourname}}" required auto-validate error-message="required"></paper-input>
         <paper-dropdown-menu label="Device type">
-          <paper-listbox slot="dropdown-content" selected="1">
+          <paper-listbox slot="dropdown-content" selected="0">
             <paper-item>Android phone</paper-item>
             <paper-item>iPhone</paper-item>
             <paper-item>Windows phone</paper-item>
             <paper-item>other</paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
-        <paper-toggle-button id="locationtoggle" toggles checked={{locationtoggle}}>Enable location</paper-toggle-button>
-        <paper-button raised on-click="submit">Submit</paper-button>
+        
+        <paper-button raised on-click="_submit">Submit</paper-button>
       </form>
+      </iron-form>
     </div>
   </template>
 
@@ -74,49 +73,70 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'my-view2'; }
       static get properties() { 
         return {
+          uid: {
+            type: String
+
+          },
+          myorientation: {
+            type: Object
+          },
+          mylocation: {
+            type: Object
+          },
           locationtoggle: {
-            type:Boolean,
+            type: Boolean,
             value: false
           }
         }
       }
       ready(){
         super.ready();
-        var form = this.$.form;
-        form.addEventListener('iron-form-presubmit', function(event) {
-          event.preventDefault();
-          //TODO: add form checking
-        });
-        /*TODO
-        var loc = document.querySelector('geo-location');
-        loc.addEventListener('geo-response', function(e) {
-          console.log('lat:' + this.latitude, 'lng:' + this.longitude);
-        });
-        */
-
+        
       }
-      submit(){
-        var mything = {
-            "description": "My phone",
-            "name":"Phone",
+       _submit(e) {
+        let form = this.$.registerForm;
+        if (form.validate()) {
+          
+          let mything = {
+            "name":this.uid,
+            "description": "Mobile phone with movement sensor",
             "properties": {
-                "organisation": null,
-                "owner": null
-            }
+                "owner": this.yourname
+            },
+            "Locations": [{
+                "name": "Myphone",
+                "description": "my phone location",
+                "encodingType": "application/vnd.geo+json",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [this.mylocation.x,this.mylocation.y]
+                }
+            }],
+            "Datastreams": [{
+                "name": "Motiondata",
+                "unitOfMeasurement": {
+                    "name": "degrees",
+                    "symbol": "deg",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Degrees"
+                },
+                "description": "Rotation measurement",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "ObservedProperty": {
+                    "name": "Rotation",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Rotation",
+                    "description": "Rotation of the phone relative to the z-axis"
+                },
+                "Sensor": {
+                    "name": "Motion sensor",
+                    "description": "Gyroscope",
+                    "encodingType": "application/pdf",
+                    "metadata": "No meta"
+                }
+            }]
+          };
+          //Uncomment to activate
+          this.$.creator.createThing(mything);
         }
-        var mylocation = {
-            "description": "my backyard",
-            "name": "my backyard",
-            "encodingType": "application/vnd.geo+json",
-            "location": {
-                "type": "Point",
-                "coordinates": [-117.123,
-                54.123]
-            }
-        };
-
-
-        this.$.creator.createThing(mything);
       }
     }
 
