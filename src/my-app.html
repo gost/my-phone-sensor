@@ -9,8 +9,6 @@
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/app-route/app-location.html">
-<link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -66,12 +64,6 @@
 
 <!-- NON UI elements -->
 
-    <app-location route="{{route}}"></app-location>
-    <app-route
-        route="{{route}}"
-        pattern="[[rootPattern]]:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
     <my-cookie uid="{{uid}}"></my-cookie>
 
     <geo-location id="geolocator" idle=[[!locationtoggle]]></geo-location>
@@ -82,15 +74,24 @@
       auto=[[sensortoggle]]
     ></device-orientation>
 
+    <!-- Non UI elements -->
+    <gost-things auto id='things'
+        requesturl='http://gost.geodan.nl/v1.0/Things'
+        filter= [[filter]]
+        things='{{thingsarray}}'
+      >
+    </gost-things>
+    
+
 <!-- UI elements -->
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="view1">Status</a>
-          <a name="view2" href="view2">Add phone</a>
-          <a name="view3" href="view3">About</a>
+          <a name="view1">Status</a>
+          <a name="view2">Add phone</a>
+          <a name="view3">About</a>
         </iron-selector>
       </app-drawer>
 
@@ -134,12 +135,10 @@
         return {
           page: {
             type: String,
+            value: 'view1',
             reflectToAttribute: true,
             observer: '_pageChanged',
           },
-          rootPattern: String,
-          routeData: Object,
-          subroute: String,
           myorientation: {
             type: Object
           },
@@ -153,23 +152,31 @@
           sensortoggle: {
             type: Boolean,
             value: false
-          }
+          },
+          connected: {
+              type: Boolean,
+              value: false
+          },
+          locationPolling: {
+            type: Boolean,
+            value: false
+          },
+          sensorActive: {
+            type: Boolean,
+            value: false
+          },
           
         };
       }
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)',
+          
         ];
       }
 
       constructor() {
         super();
-
-        // Get root pattern for app-route, for more info about `rootPath` see:
-        // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
-        this.rootPattern = (new URL(this.rootPath)).pathname;
       }
       ready(){
         super.ready();
@@ -182,36 +189,15 @@
       _doregister(){
         this.page = 'view2';
       }
-      _routePageChanged(page) {
-        // Polymer 2.0 will call with `undefined` on initialization.
-        // Ignore until we are properly called with a string.
-        if (page === undefined) {
-          return;
-        }
-
-        // If no page was found in the route data, page will be an empty string.
-        // Deault to 'view1' in that case.
+      _pageChanged(page) {
         this.page = page || 'view1';
-
-        // Close a non-persistent drawer when the page & route are changed.
+        // Close a non-persistent drawer when the page is changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
         }
       }
 
-      _pageChanged(page) {
-        // Load page import on demand. Show 404 page if fails
-        var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
-        Polymer.importHref(
-            resolvedPageUrl,
-            null,
-            this._showPage404.bind(this),
-            true);
-      }
-
-      _showPage404() {
-        this.page = 'view404';
-      }
+      
     }
 
     window.customElements.define(MyApp.is, MyApp);

@@ -20,13 +20,6 @@
         padding: 10px;
       }
     </style>
-    <!-- Non UI elements -->
-    <gost-things auto id='thingsrequest'
-        requesturl='http://gost.geodan.nl/v1.0/Things'
-        filter= [[filter]]
-        things='{{thingsarray}}'
-      >
-    </gost-things>
     
 
     <!-- UI elements -->
@@ -94,6 +87,7 @@
             filter: {
               type: String
             },
+            
             addphone: {
               type: Boolean,
               value: false
@@ -110,9 +104,6 @@
       }
       ready(){
         super.ready();
-        this.$.thingsrequest.addEventListener('deleted',()=>{
-          this.$.thingsrequest.refresh();
-        })
       }
       testReadyToRegister(addphone,locationtoggle,sensortoggle){
         if (addphone && locationtoggle && sensortoggle){
@@ -125,7 +116,7 @@
       }
       delete(){
         if (this.myphone){
-          this.$.thingsrequest.delete(this.myphone["@iot.id"]);
+          this.$.things.delete(this.myphone["@iot.id"]);
         }
         else {
           console.warn('No active phone to delete');
