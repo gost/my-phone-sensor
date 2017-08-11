@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       If deploying to a non-root path, replace href="/" with the full path to the project root.
       For example: href="/polymer-starter-kit/relative-path-example/"
     -->
-    <base href="/">
+    <base href="/sites/my-phone-sensor/">
 
     <link rel="icon" href="./images/favicon.ico">
 
@@ -55,8 +55,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script>
       // Register the base URL
-      //const baseUrl = document.querySelector('base').href;
-      const baseUrl = document.querySelector('base').href + '/sites/my-phone-sensor/';
+      const baseUrl = document.querySelector('base').href;
+      
 
       // Load and register pre-caching Service Worker
       if ('serviceWorker' in navigator) {
