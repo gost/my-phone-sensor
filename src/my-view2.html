@@ -36,14 +36,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <gost-creator id='creator'></gost-creator>
+    <gost-creator id='creator'
+      on-created='_onCreated'
+    ></gost-creator>
     
 
 
     <div class="card">
-      <div class="circle">2</div>
+      
       <h1>Add your phone</h1>
       <!-- Debug -->
+      
       My UID: [[uid]]
       OrientationApi: [[orientationsupported]] <br>
       Sensoravailable: [[sensorsavailable]]<br>
@@ -83,15 +86,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           mylocation: {
             type: Object
           },
-          locationtoggle: {
-            type: Boolean,
-            value: false
-          }
+          
         }
       }
       ready(){
         super.ready();
         
+      }
+      _onCreated(){
+        this.dispatchEvent(new CustomEvent('created'));
       }
        _submit(e) {
         let form = this.$.registerForm;

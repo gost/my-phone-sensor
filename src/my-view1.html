@@ -5,7 +5,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
-<link rel="import" href="../bower_components/gost-elements/gost-things.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="shared-styles.html">
@@ -24,43 +23,7 @@
 
     <!-- UI elements -->
 
-    <div class="card">
-      <div class="card-content">
-        <h2>Status</h2>
-        <dom-if if=[[checking_phone]]>
-          <template>
-            <div>
-              <paper-spinner active=[[checking_phone]]></paper-spinner>
-              Checking if your phone is registered...
-            </div>
-          </template>
-        </dom-if>
-        <dom-if if=[[addphone]]>
-          <template>
-          Your phone is not registered. In order to register, turn your location and motion sensors on.
-          </template>
-        </dom-if>
-        <dom-if if=[[!addphone]]>
-          <template>
-          Your phone is registered.
-          </template>
-      </dom-if>
-        <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>Enable location</paper-toggle-button>
-        <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>Enable sensors</paper-toggle-button>
-        <dom-if if="{{testReadyToRegister(addphone,locationtoggle,sensortoggle) }}" >
-          <template>
-            <div class="card-actions">
-              <paper-button on-click='doregister'>continue</paper-button>
-            </div>
-          </template>
-        </dom-if>
-        <dom-if if=[[!addphone]]>
-          <template>
-            <paper-button on-click='delete'>De-register my phone</paper-button>
-          </template>
-        </dom-if>
-      </div>
-    </div>
+    
   </template>
 
   <script>
@@ -69,26 +32,18 @@
       static get properties() {
           return {
             thingsarray: {
-              type: Array,
-              observer: '_thingsArrayChanged'
+              type: Array
             },
-            uid: {
-              type:String,
-              observer: '_createFilter'
-            },
+            
             myphone: {
               type: Object,
               notify: true
-            },
-            statustext: {
-              type: String,
-              value: "Looking for phone..."
             },
             filter: {
               type: String
             },
             
-            addphone: {
+            registered: {
               type: Boolean,
               value: false
             },
@@ -105,35 +60,16 @@
       ready(){
         super.ready();
       }
-      testReadyToRegister(addphone,locationtoggle,sensortoggle){
-        if (addphone && locationtoggle && sensortoggle){
-          return true;
-        }
-        return false;
-      }
+      
       doregister(){
         this.dispatchEvent(new CustomEvent('doregister'));
       }
       delete(){
-        if (this.myphone){
-          this.$.things.delete(this.myphone["@iot.id"]);
-        }
-        else {
-          console.warn('No active phone to delete');
-        }
+        this.dispatchEvent(new CustomEvent('dodelete'));
+        
       }
-      _createFilter(uid){
-        this.filter = "name eq '" + uid+"'";
-      }
-      _thingsArrayChanged(thingsarray){
-        if (thingsarray.length > 0){
-          this.myphone = thingsarray[0];
-        }
-        else {
-          this.addphone = true;
-        }
-        this.checking_phone = false;
-      }
+      
+      
     }
 
     window.customElements.define(MyView1.is, MyView1);

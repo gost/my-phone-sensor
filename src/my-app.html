@@ -12,18 +12,36 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-error.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="my-cookie.html">
-<link rel="import" href="../bower_components/gost-elements/gost-mqtt.html">
+<link rel="import" href="../bower_components/gost-elements/gost-things.html">
+<link rel="import" href="../bower_components/gost-elements/gost-datastream.html">
+<link rel="import" href="../bower_components/gost-elements/gost-creator.html">
 
-<link rel="import" href="my-view1.html">
-<link rel="import" href="my-view2.html">
+<link rel="import" href="geo-location.html">
+<link rel="import" href="device-orientation.html">
+
+
+<link rel="import" href="shared-styles.html">
 <link rel="import" href="my-view3.html">
 <link rel="import" href="my-view404.html">
 
 <dom-module id="my-app">
   <template>
-    <style>
+    <style include="shared-styles">
+    
       :host {
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
@@ -66,7 +84,11 @@
 
     <my-cookie uid="{{uid}}"></my-cookie>
 
-    <geo-location id="geolocator" idle=[[!locationtoggle]]></geo-location>
+    <geo-location id="geolocator" 
+      idle=[[!locationtoggle]]
+      longitude={{longitude}}
+      latitude={{latitude}}
+    ></geo-location>
     <device-orientation id="orientator" 
       api-supported={{orientationsupported}}
       sensors-available={{sensorsavailable}}
@@ -78,17 +100,25 @@
     <gost-things auto id='things'
         requesturl='http://gost.geodan.nl/v1.0/Things'
         filter= [[filter]]
-        things='{{thingsarray}}'
+        result='{{thingsarray}}'
+        params='{"$expand":"Datastreams"}'
+        firstconnect={{firstconnect}}
       >
     </gost-things>
-    
+    <gost-creator id='creator'
+      on-created='_onCreated'
+    ></gost-creator>
+    <gost-datastream id='datastream'
+      baseurl='http://gost.geodan.nl/v1.0'
+      datastreamid=[[datastreamid]]
+    ></gost-datastream>
 
 <!-- UI elements -->
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer">
         <app-toolbar>Menu</app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+        <iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="view1">Status</a>
           <a name="view2">Add phone</a>
           <a name="view3">About</a>
@@ -110,17 +140,78 @@
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <my-view1 name="view1" uid="[[uid]]" 
-            on-doregister='_doregister'
-            on-dodelete='_dodelete'
-            sensortoggle={{sensortoggle}}
-            locationtoggle={{locationtoggle}}
-            ></my-view1>
-          <my-view2 name="view2" uid="[[uid]]" 
-            mylocation=[[mylocation]]
-            myorientation=[[myorientation]]></my-view2>
+          <div name="view1">
+            <dom-if if=[[debug]]>
+              <template>
+                <!-- Debug -->
+                My UID: [[uid]]
+                OrientationApi: [[orientationsupported]] <br>
+                Sensoravailable: [[sensorsavailable]]<br>
+                MyOrientation: [[myorientation.absolute]]<br>
+                MyLocation: [[mylocation.x]],[[mylocation.y]]<br>
+                <!-- End of debug -->
+              </template>
+            </dom-if>
+            <dom-if if=[[!connected]]>
+              <template>
+                <div>
+                  <paper-spinner active=[[!connected]]></paper-spinner>
+                  Checking if your phone is registered...
+                </div>
+              </template>
+            </dom-if>
+            <div class="card">
+              <div class="card-content">
+                <h2>Status</h2>
+                <dom-if if=[[!registered]]>
+                  <template>
+                  Your phone is not registered. In order to register, turn your location and motion sensors on.
+                  </template>
+                </dom-if>
+                <dom-if if=[[registered]]>
+                  <template>
+                  Your phone is registered.
+                  </template>
+              </dom-if>
+                <br>
+                Location sharing:<br>
+                <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>
+                  <dom-if if=[[locationtoggle]]><template>On</template></dom-if>
+                  <dom-if if=[[!locationtoggle]]><template>Off</template></dom-if>
+
+                </paper-toggle-button>
+                Sensor values:<br>
+                <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>
+                  <dom-if if=[[sensortoggle]]><template>On</template></dom-if>
+                  <dom-if if=[[!sensortoggle]]><template>Off</template></dom-if>
+                </paper-toggle-button>
+                
+                <dom-if if=[[registered]]>
+                  <template>
+                    <paper-button on-click='_dodelete'>De-register my phone</paper-button>
+                  </template>
+                </dom-if>
+              </div>
+            </div>
+            <dom-if if="{{testReadyToRegister(registered,locationtoggle,sensortoggle) }}" >
+            <template>
+              <div class="card">
+                <h1>Add your phone</h1>
+                <iron-form id="registerForm">
+                <form  method="post" action="#">
+                  <paper-input  id="namefield" label="Your name" value="{{yourname}}" required auto-validate error-message="required"></paper-input>
+                  <paper-button raised on-click="_submit">Submit</paper-button>
+                </form>
+                </iron-form>
+              </div>
+            </template>
+          </dom-if>
+            
+          </div>
           <my-view3 name="view3"></my-view3>
+
           <my-view404 name="view404"></my-view404>
+
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -133,14 +224,34 @@
 
       static get properties() {
         return {
+          debug: {
+            type: Boolean,
+            value: false
+          },
           page: {
             type: String,
             value: 'view1',
             reflectToAttribute: true,
             observer: '_pageChanged',
           },
+          uid: {
+            type:String,
+            observer: '_createFilter'
+          },
+          username: {
+            type: String
+          },
           myorientation: {
-            type: Object
+            type: Object,
+            observer: '_orientationChanged'
+          },
+          longitude: {
+            type: Number,
+            observer: '_locationChanged'
+          },
+          latitude: {
+            type: Number,
+            observer: '_locationChanged'
           },
           mylocation: {
             type: Object
@@ -153,9 +264,9 @@
             type: Boolean,
             value: false
           },
-          connected: {
-              type: Boolean,
-              value: false
+          registered: {
+            type: Boolean,
+            value: false
           },
           locationPolling: {
             type: Boolean,
@@ -165,14 +276,16 @@
             type: Boolean,
             value: false
           },
-          
+          thingsarray: {
+            type: Array,
+            observer: '_thingsArrayChanged'
+          }
         };
       }
-
       static get observers() {
         return [
           
-        ];
+        ]
       }
 
       constructor() {
@@ -181,13 +294,47 @@
       ready(){
         super.ready();
         var self = this;
-        this.$.geolocator.addEventListener('geo-response', function(e) {
-          self.mylocation = {x:this.longitude,y:this.latitude};
-          //console.log('lat:' + this.latitude, 'lng:' + this.longitude);
-        });
+        this.$.things.refresh();
       }
-      _doregister(){
-        this.page = 'view2';
+      _onCreated(e){
+        this.datastreamid = e.detail.Datastreams[0]["@iot.id"];
+        this.registered = true;
+        this.$.things.refresh();
+      }
+      _phoneSelected(e){
+        var selectedItem = e.target.selectedItem;
+        if (selectedItem) {
+          this.phoneselected = selectedItem.innerText;
+        }
+      }
+      _locationChanged(){
+        this.mylocation = {x:this.longitude,y:this.latitude};
+      }
+      _orientationChanged(orientation){
+        let now = new Date();
+        let data = {
+          "phenomenonTime": now.toISOString(),
+          "result": orientation.absolute,
+          "resultTime": now.toISOString(),
+        };
+        if (this.registered){
+          this.$.datastream.addObservation(data);
+        }
+      }
+      testReadyToRegister(registered,locationtoggle,sensortoggle){
+        if (!registered && locationtoggle && sensortoggle){
+          return true;
+        }
+        return false;
+      }
+     
+      _dodelete(){
+        if (this.myphone){
+          this.$.things.delete(this.myphone["@iot.id"]);
+        }
+        else {
+          console.warn('No active phone to delete');
+        }
       }
       _pageChanged(page) {
         this.page = page || 'view1';
@@ -196,8 +343,68 @@
           this.$.drawer.close();
         }
       }
-
       
+      _thingsArrayChanged(thingsarray){
+        if (thingsarray.length > 0){
+          this.myphone = thingsarray[0];
+          this.datastreamid = this.myphone.Datastreams[0]["@iot.id"];
+          this.username = this.myphone.properties.owner;
+          this.registered = true;
+        }
+        else {
+          this.registered = false;
+          this.myphone = null;
+          this.datastreamid = null;
+        }
+      }
+      _createFilter(uid){
+        this.filter = "name eq '" + uid+"'";
+      }
+      _submit(e) {
+        let form = this.shadowRoot.querySelector('#registerForm');
+        if (form.validate()) {
+          
+          let mything = {
+            "name":this.uid,
+            "description": "Mobile phone with movement sensor",
+            "properties": {
+                "owner": this.yourname
+            },
+            "Locations": [{
+                "name": "Myphone",
+                "description": "my phone location",
+                "encodingType": "application/vnd.geo+json",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [this.mylocation.x,this.mylocation.y]
+                }
+            }],
+            "Datastreams": [{
+                "name": "Motiondata",
+                "unitOfMeasurement": {
+                    "name": "degrees",
+                    "symbol": "deg",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Degrees"
+                },
+                "description": "Rotation measurement",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "ObservedProperty": {
+                    "name": "Rotation",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Rotation",
+                    "description": "Rotation of the phone relative to the z-axis"
+                },
+                "Sensor": {
+                    "name": "Motion sensor",
+                    "description": "Gyroscope",
+                    "encodingType": "application/pdf",
+                    "metadata": "No meta"
+                }
+            }]
+          };
+          //Uncomment to activate
+          this.$.creator.createThing(mything);
+        }
+      }
     }
 
     window.customElements.define(MyApp.is, MyApp);
