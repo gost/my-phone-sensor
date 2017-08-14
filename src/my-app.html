@@ -189,12 +189,12 @@
                 <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>
                   <dom-if if=[[locationtoggle]]><template>On</template></dom-if>
                   <dom-if if=[[!locationtoggle]]><template>Off</template></dom-if>
-                
                 </paper-toggle-button>
+
                 Motion sensor:<br>
                 <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>
                   <dom-if if=[[sensortoggle]]><template>On<br>
-                  <paper-progress value="[[myorientationPercentage]]"></paper-progress>  
+                    <paper-progress value="[[myorientationPercentage]]"></paper-progress>  
                   </template></dom-if>
                   <dom-if if=[[!sensortoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
