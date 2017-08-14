@@ -51,6 +51,14 @@ Example to get the device orientation values:
           type: Boolean,
           readOnly: true,
           notify: true
+        },
+        /**
+         * If true, the element will be inactive
+         */
+        idle: {
+          type: Boolean,
+          value: false,
+          observer: '_toggle'
         }
       }
       }
@@ -60,12 +68,30 @@ Example to get the device orientation values:
         if (window.DeviceOrientationEvent) {
           this._setApiSupported(true);
           this._deviceorientationListener = this._handleOrientation.bind(this);
-          window.addEventListener('deviceorientation', this._deviceorientationListener, true);
+          //window.addEventListener('deviceorientation', this._deviceorientationListener, true);
         } else {
           this._setApiSupported(false);
         }
       }
-
+      _toggle(){
+        if (this.auto===true){
+          this.start();
+        }
+        else {
+          this.stop();
+        }
+      }
+      start(){
+        if (window.DeviceOrientationEvent) {
+          this._deviceorientationListener = this._handleOrientation.bind(this);
+          window.addEventListener('deviceorientation', this._deviceorientationListener, true);
+        } else {
+          //do nothing
+        }
+      }
+      stop(){
+        window.removeEventListener('deviceorientation', this._deviceorientationListener);
+      }
       disconnectedCallback () {
         window.removeEventListener('deviceorientation', this._deviceorientationListener);
       }

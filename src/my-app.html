@@ -32,6 +32,7 @@
 
 <link rel="import" href="geo-location.html">
 <link rel="import" href="device-orientation.html">
+<link rel="import" href="audio-sensor.html">
 
 
 <link rel="import" href="shared-styles.html">
@@ -83,19 +84,23 @@
 <!-- NON UI elements -->
 
     <my-cookie uid="{{uid}}"></my-cookie>
-
+    <!--
     <geo-location id="geolocator" 
       idle=[[!locationtoggle]]
       longitude={{longitude}}
       latitude={{latitude}}
     ></geo-location>
+    -->
     <device-orientation id="orientator" 
       api-supported={{orientationsupported}}
       sensors-available={{sensorsavailable}}
       orientation={{myorientation}}
       auto=[[sensortoggle]]
     ></device-orientation>
-
+    <audio-sensor id="audiosensor" 
+      auto=[[audiotoggle]]
+      measurements={{mynoise}}
+    ></audio-sensor>
     <!-- Non UI elements -->
     <gost-things auto id='things'
         requesturl='http://gost.geodan.nl/v1.0/Things'
@@ -111,6 +116,10 @@
     <gost-datastream id='datastream'
       baseurl='http://gost.geodan.nl/v1.0'
       datastreamid=[[datastreamid]]
+    ></gost-datastream>
+    <gost-datastream id='noisedatastream'
+      baseurl='http://gost.geodan.nl/v1.0'
+      datastreamid=[[noisedatastreamid]]
     ></gost-datastream>
 
 <!-- UI elements -->
@@ -148,7 +157,7 @@
                 OrientationApi: [[orientationsupported]] <br>
                 Sensoravailable: [[sensorsavailable]]<br>
                 MyOrientation: [[myorientation.absolute]]<br>
-                MyLocation: [[mylocation.x]],[[mylocation.y]]<br>
+                Audiodata: [[mynoise]]<br>
                 <!-- End of debug -->
               </template>
             </dom-if>
@@ -165,7 +174,7 @@
                 <h2>Status</h2>
                 <dom-if if=[[!registered]]>
                   <template>
-                  Your phone is not registered. In order to register, turn your location and motion sensors on.
+                  Your phone is not registered. In order to register, turn your audio and motion sensors on.
                   </template>
                 </dom-if>
                 <dom-if if=[[registered]]>
@@ -174,16 +183,22 @@
                   </template>
               </dom-if>
                 <br>
+                <!--
                 Location sharing:<br>
                 <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>
                   <dom-if if=[[locationtoggle]]><template>On</template></dom-if>
                   <dom-if if=[[!locationtoggle]]><template>Off</template></dom-if>
-
+                -->
                 </paper-toggle-button>
-                Sensor values:<br>
+                Motion sensor:<br>
                 <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>
                   <dom-if if=[[sensortoggle]]><template>On</template></dom-if>
                   <dom-if if=[[!sensortoggle]]><template>Off</template></dom-if>
+                </paper-toggle-button>
+                Audio sensor:<br>
+                <paper-toggle-button id="audiotoggle" toggles required checked={{audiotoggle}}>
+                  <dom-if if=[[audiotoggle]]><template>On</template></dom-if>
+                  <dom-if if=[[!audiotoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
                 
                 <dom-if if=[[registered]]>
@@ -210,7 +225,7 @@
           </div>
           <div name="view2">
 
-            
+
           </div>
           <my-view3 name="view3"></my-view3>
 
@@ -230,7 +245,7 @@
         return {
           debug: {
             type: Boolean,
-            value: false
+            value: true
           },
           page: {
             type: String,
@@ -249,6 +264,10 @@
             type: Object,
             observer: '_orientationChanged'
           },
+          mynoise:{
+            type: Number,
+            observer: '_noiseChanged'
+          },
           longitude: {
             type: Number,
             observer: '_locationChanged'
@@ -258,11 +277,12 @@
             observer: '_locationChanged'
           },
           mylocation: {
-            type: Object
+            type: Object,
+            value: ()=>{return {x:0,y:0}}
           },
           locationtoggle: {
             type: Boolean,
-            value: false
+            value: true
           },
           sensortoggle: {
             type: Boolean,
@@ -302,6 +322,7 @@
       }
       _onCreated(e){
         this.datastreamid = e.detail.Datastreams[0]["@iot.id"];
+        this.noisedatastreamid = e.detail.Datastreams[1]["@iot.id"];
         this.registered = true;
         this.$.things.refresh();
       }
@@ -323,6 +344,17 @@
         };
         if (this.registered){
           this.$.datastream.addObservation(data);
+        }
+      }
+      _noiseChanged(instant){
+        let now = new Date();
+        let data = {
+          "phenomenonTime": now.toISOString(),
+          "result": instant,
+          "resultTime": now.toISOString(),
+        };
+        if (this.registered){
+          this.$.noisedatastream.addObservation(data);
         }
       }
       testReadyToRegister(registered,locationtoggle,sensortoggle){
@@ -351,7 +383,9 @@
       _thingsArrayChanged(thingsarray){
         if (thingsarray.length > 0){
           this.myphone = thingsarray[0];
-          this.datastreamid = this.myphone.Datastreams[0]["@iot.id"];
+          
+          this.datastreamid = this.myphone.Datastreams.filter(d=>{return d.name == "Motiondata"})[0]["@iot.id"];
+          this.noisedatastreamid = this.myphone.Datastreams.filter(d=>{return d.name == "Noisedata"})[0]["@iot.id"];
           this.username = this.myphone.properties.owner;
           this.registered = true;
         }
@@ -359,6 +393,7 @@
           this.registered = false;
           this.myphone = null;
           this.datastreamid = null;
+          this.noisedatastreamid = null;
         }
       }
       _createFilter(uid){
@@ -400,6 +435,26 @@
                 "Sensor": {
                     "name": "Motion sensor",
                     "description": "Gyroscope",
+                    "encodingType": "application/pdf",
+                    "metadata": "No meta"
+                }
+            },{
+                "name": "Noisedata",
+                "unitOfMeasurement": {
+                    "name": "decibels",
+                    "symbol": "dB",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Decibels"
+                },
+                "description": "Noise measurement",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "ObservedProperty": {
+                    "name": "Noise",
+                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Noise",
+                    "description": "Noise that is produced around the sensor"
+                },
+                "Sensor": {
+                    "name": "Noise sensor",
+                    "description": "Microphone",
                     "encodingType": "application/pdf",
                     "metadata": "No meta"
                 }
