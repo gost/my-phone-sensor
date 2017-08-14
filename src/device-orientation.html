@@ -67,8 +67,6 @@ Example to get the device orientation values:
         super.ready();
         if (window.DeviceOrientationEvent) {
           this._setApiSupported(true);
-          this._deviceorientationListener = this._handleOrientation.bind(this);
-          //window.addEventListener('deviceorientation', this._deviceorientationListener, true);
         } else {
           this._setApiSupported(false);
         }
