@@ -21,7 +21,7 @@ Example to get the device orientation values:
 <dom-module id="audio-sensor">
 
     <template>
-     <audio id="audio" controls autoplay></audio>
+     <!--<audio id="audio" controls autoplay></audio>-->
     </template>
 
   <script>
@@ -115,7 +115,7 @@ Example to get the device orientation values:
       }
       start(){
         var self = this;
-        var audio = this.$.audio;
+        //var audio = this.$.audio;
         var constraints = window.constraints = {
             audio: true,
             video: false

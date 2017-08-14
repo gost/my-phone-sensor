@@ -175,7 +175,7 @@
                 <h2>Status</h2>
                 <dom-if if=[[!registered]]>
                   <template>
-                  Your phone is not registered. In order to register, turn your audio and motion sensors on.
+                  Your phone is not registered. In order to register, turn your motion sensor on.
                   </template>
                 </dom-if>
                 <dom-if if=[[registered]]>
@@ -199,6 +199,7 @@
                   <dom-if if=[[!sensortoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
                 <br>
+                <!--
                 Audio sensor:<br>
                 <paper-toggle-button id="audiotoggle" toggles required checked={{audiotoggle}}>
                   <dom-if if=[[audiotoggle]]><template>On<br>
@@ -207,7 +208,7 @@
                   </template></dom-if>
                   <dom-if if=[[!audiotoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
-                
+                -->
                 <dom-if if=[[registered]]>
                   <template>
                     <paper-button on-click='_dodelete'>De-register my phone</paper-button>
@@ -215,7 +216,7 @@
                 </dom-if>
               </div>
             </div>
-            <dom-if if="{{testReadyToRegister(registered,audiotoggle,sensortoggle) }}" >
+            <dom-if if="{{testReadyToRegister(registered,sensortoggle) }}" >
             <template>
               <div class="card">
                 <h1>Add your phone</h1>
@@ -378,8 +379,8 @@
       _computeMyNoisePercentage(noise){
         return noise * 100;
       }
-      testReadyToRegister(registered,locationtoggle,sensortoggle){
-        if (!registered && locationtoggle && sensortoggle){
+      testReadyToRegister(registered,sensortoggle){
+        if (!registered && sensortoggle){
           return true;
         }
         return false;
