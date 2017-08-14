@@ -104,7 +104,7 @@
     ></audio-sensor>
     <!-- Non UI elements -->
     <gost-things auto id='things'
-        requesturl='http://gost.geodan.nl/v1.0/Things'
+        requesturl='https://research.geodan.nl/service/gost/Things'
         filter= [[filter]]
         result='{{thingsarray}}'
         params='{"$expand":"Datastreams"}'
@@ -115,11 +115,11 @@
       on-created='_onCreated'
     ></gost-creator>
     <gost-datastream id='datastream'
-      baseurl='http://gost.geodan.nl/v1.0'
+      baseurl='https://research.geodan.nl/service/gost'
       datastreamid=[[datastreamid]]
     ></gost-datastream>
     <gost-datastream id='noisedatastream'
-      baseurl='http://gost.geodan.nl/v1.0'
+      baseurl='https://research.geodan.nl/service/gost'
       datastreamid=[[noisedatastreamid]]
     ></gost-datastream>
 
@@ -184,12 +184,12 @@
                   </template>
               </dom-if>
                 <br><br>
-                <!--
+                
                 Location sharing:<br>
                 <paper-toggle-button id="locationtoggle" toggles required checked={{locationtoggle}}>
                   <dom-if if=[[locationtoggle]]><template>On</template></dom-if>
                   <dom-if if=[[!locationtoggle]]><template>Off</template></dom-if>
-                -->
+                
                 </paper-toggle-button>
                 Motion sensor:<br>
                 <paper-toggle-button id="sensortoggle" toggles required checked={{sensortoggle}}>
@@ -199,7 +199,7 @@
                   <dom-if if=[[!sensortoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
                 <br>
-                <!--
+                
                 Audio sensor:<br>
                 <paper-toggle-button id="audiotoggle" toggles required checked={{audiotoggle}}>
                   <dom-if if=[[audiotoggle]]><template>On<br>
@@ -208,7 +208,7 @@
                   </template></dom-if>
                   <dom-if if=[[!audiotoggle]]><template>Off</template></dom-if>
                 </paper-toggle-button>
-                -->
+                
                 <dom-if if=[[registered]]>
                   <template>
                     <paper-button on-click='_dodelete'>De-register my phone</paper-button>
