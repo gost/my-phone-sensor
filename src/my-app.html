@@ -157,7 +157,7 @@
                 My UID: [[uid]]
                 OrientationApi: [[orientationsupported]] <br>
                 Sensoravailable: [[sensorsavailable]]<br>
-                MyOrientation: [[myorientation.absolute]]<br>
+                MyOrientation: [[myorientation]]<br>
                 Audiodata: [[mynoise]]<br>
                 <!-- End of debug -->
               </template>
@@ -268,7 +268,7 @@
             type: String
           },
           myorientation: {
-            type: Object,
+            type: Number,
             observer: '_orientationChanged'
           },
           myorientationPercentage: {
@@ -354,7 +354,7 @@
         let now = new Date();
         let data = {
           "phenomenonTime": now.toISOString(),
-          "result": orientation.absolute,
+          "result": orientation,
           "resultTime": now.toISOString(),
         };
         if (this.registered){
@@ -362,7 +362,7 @@
         }
       }
       _computeMyOrientationPercentage(myorientation){
-        return myorientation.absolute * 100;
+        return myorientation / 360;
       }
       _noiseChanged(instant){
         let now = new Date();
