@@ -88,12 +88,12 @@ Example to get the device orientation values:
                 // necessary to make sample run, but should not be.
                 this.script.connect(this.context.destination);
                 if (typeof callback !== 'undefined') {
-                callback(null);
+                    callback(null);
                 }
             } catch (e) {
                 console.error(e);
                 if (typeof callback !== 'undefined') {
-                callback(e);
+                    callback(e);
                 }
             }
         };
@@ -128,7 +128,7 @@ Example to get the device orientation values:
                 console.log('Stream ended');
             };
             window.stream = stream; // make variable available to browser console
-            audio.srcObject = stream;
+            //audio.srcObject = stream;
 
             var soundMeter = new SoundMeter(window.audioContext);
             soundMeter.connectToSource(stream, function(e) {

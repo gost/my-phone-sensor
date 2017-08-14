@@ -22,12 +22,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <div class="card">
-      <div class="circle">3</div>
-      <h1>View Three</h1>
-      <ol>
-        <li>Adding thing (using preset observed property and sensor)
-          <li>Creating datastream
-      </ol>
+      <h1>About</h1>
+      <p>
+        This app is a demo tool that shows a proof of concept to add sensors to <a href="https://www.gostserver.xyz/">GOST</a>.
+      </p>
     </div>
   </template>
 
@@ -35,21 +33,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     class MyView3 extends Polymer.Element {
       static get is() { return 'my-view3'; }
 
-      createstream(){
-          var mydatstream = {
-              "unitOfMeasurement": {
-                  "symbol": "degrees",
-                  "name": "degree rotation",
-                  "definition": "null"
-              },
-            "observationType":"null",
-            "description": "Phone rotation  readings",
-            "name": "Phone rotation  readings",
-            "Thing": {"@iot.id": null},
-            "ObservedProperty": {"@iot.id": 9},
-            "Sensor": {"@iot.id": 6}
-          };
-      }
+
+      
     }
     window.customElements.define(MyView3.is, MyView3);
   </script>

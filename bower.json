@@ -27,7 +27,8 @@
     "neon-animation": "^2.0.1",
     "paper-dialog": "^2.0.0",
     "iron-form": "^2.0.0",
-    "gost-elements": "https://github.com/GeodanElements/gost-elements.git"
+    "gost-elements": "https://github.com/GeodanElements/gost-elements.git",
+    "paper-progress": "^2.0.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"
