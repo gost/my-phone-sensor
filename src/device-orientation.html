@@ -95,19 +95,22 @@ Example to get the device orientation values:
       }
 
       _handleOrientation(event) {
-        /*
-        this._setOrientation({
-          absolute: event.absolute,
-          alpha: event.alpha,
-          beta: event.beta,
-          gamma: event.gamma
-        });
-        */
-        this.orientation = event.beta;
+        if (this.auto){ // This should be arranged in the listener
+          /*
+          this._setOrientation({
+            absolute: event.absolute,
+            alpha: event.alpha,
+            beta: event.beta,
+            gamma: event.gamma
+          });
+          */
+          
+          this.orientation = event.beta;
 
-        this._setSensorsAvailable(
-          !(event.alpha === null && event.beta === null && event.gamma === null)
-        );
+          this._setSensorsAvailable(
+            !(event.alpha === null && event.beta === null && event.gamma === null)
+          );
+        }
       }
     };
     window.customElements.define(DeviceOrientation.is, DeviceOrientation);
