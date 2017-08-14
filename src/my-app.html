@@ -362,7 +362,7 @@
         }
       }
       _computeMyOrientationPercentage(myorientation){
-        return myorientation / 360;
+        return myorientation / 1;
       }
       _noiseChanged(instant){
         let now = new Date();
@@ -376,7 +376,7 @@
         }
       }
       _computeMyNoisePercentage(noise){
-        return noise * 100;
+        return noise * 1000;
       }
       testReadyToRegister(registered,locationtoggle,sensortoggle){
         if (!registered && locationtoggle && sensortoggle){
